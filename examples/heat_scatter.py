@@ -37,5 +37,3 @@ g.despine(left=True, bottom=True)
 g.ax.margins(.02)
 for label in g.ax.get_xticklabels():
     label.set_rotation(90)
-for artist in g.legend.legendHandles:
-    artist.set_edgecolor(".7")

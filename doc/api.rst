@@ -1,14 +1,146 @@
 .. _api_ref:
 
-.. currentmodule:: seaborn
-
 API reference
 =============
+
+.. currentmodule:: seaborn.objects
+
+.. _objects_api:
+
+Objects interface
+-----------------
+
+Plot object
+~~~~~~~~~~~
+
+.. autosummary::
+    :toctree: generated/
+    :template: plot
+    :nosignatures:
+
+    Plot
+
+Mark objects
+~~~~~~~~~~~~
+
+.. rubric:: Dot marks
+
+.. autosummary::
+    :toctree: generated/
+    :template: object
+    :nosignatures:
+
+    Dot
+    Dots
+
+.. rubric:: Line marks
+
+.. autosummary::
+    :toctree: generated/
+    :template: object
+    :nosignatures:
+
+    Line
+    Lines
+    Path
+    Paths
+    Dash
+    Range
+
+.. rubric:: Bar marks
+
+.. autosummary::
+    :toctree: generated/
+    :template: object
+    :nosignatures:
+
+    Bar
+    Bars
+
+.. rubric:: Fill marks
+
+.. autosummary::
+    :toctree: generated/
+    :template: object
+    :nosignatures:
+
+    Area
+    Band
+
+.. rubric:: Text marks
+
+.. autosummary::
+    :toctree: generated/
+    :template: object
+    :nosignatures:
+
+    Text
+
+Stat objects
+~~~~~~~~~~~~
+
+.. autosummary::
+    :toctree: generated/
+    :template: object
+    :nosignatures:
+
+    Agg
+    Est
+    Count
+    Hist
+    KDE
+    Perc
+    PolyFit
+
+Move objects
+~~~~~~~~~~~~
+
+.. autosummary::
+    :toctree: generated/
+    :template: object
+    :nosignatures:
+
+    Dodge
+    Jitter
+    Norm
+    Stack
+    Shift
+
+Scale objects
+~~~~~~~~~~~~~
+
+.. autosummary::
+    :toctree: generated/
+    :template: scale
+    :nosignatures:
+
+    Boolean
+    Continuous
+    Nominal
+    Temporal
+
+Base classes
+~~~~~~~~~~~~
+
+.. autosummary::
+    :toctree: generated/
+    :template: object
+    :nosignatures:
+
+    Mark
+    Stat
+    Move
+    Scale
+
+.. currentmodule:: seaborn
+
+Function interface
+------------------
 
 .. _relational_api:
 
 Relational plots
-----------------
+~~~~~~~~~~~~~~~~
 
 .. autosummary::
     :toctree: generated/
@@ -21,7 +153,7 @@ Relational plots
 .. _distribution_api:
 
 Distribution plots
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
     :toctree: generated/
@@ -37,7 +169,7 @@ Distribution plots
 .. _categorical_api:
 
 Categorical plots
------------------
+~~~~~~~~~~~~~~~~~
 
 .. autosummary::
     :toctree: generated/
@@ -56,7 +188,7 @@ Categorical plots
 .. _regression_api:
 
 Regression plots
-----------------
+~~~~~~~~~~~~~~~~
 
 .. autosummary::
     :toctree: generated/
@@ -69,7 +201,7 @@ Regression plots
 .. _matrix_api:
 
 Matrix plots
-------------
+~~~~~~~~~~~~
 
 .. autosummary::
     :toctree: generated/
@@ -154,7 +286,7 @@ Color palettes
     mpl_palette
 
 Palette widgets
----------------
+~~~~~~~~~~~~~~~
 
 .. autosummary::
     :toctree: generated/

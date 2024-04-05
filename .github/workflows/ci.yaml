@@ -1,43 +1,56 @@
-name : CI
+name: CI
 
 on:
   push:
-    branches: master
+    branches: [master, v0.*]
   pull_request:
     branches: master
+  schedule:
+    - cron:  '0 6 * * 1,4' # Each Monday and Thursday at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   NB_KERNEL: python
   MPLBACKEND: Agg
+  SEABORN_DATA: ${{ github.workspace }}/seaborn-data
+  PYDEVD_DISABLE_FILE_VALIDATION: 1
 
 jobs:
-
   build-docs:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Setup Python 3.11
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
-          python-version: '3.9.x'
+          python-version: "3.11"
 
       - name: Install seaborn
         run: |
-          python -m pip install --upgrade pip
-          pip install .[all] -r ci/utils.txt
+          pip install --upgrade pip
+          pip install .[stats,docs]
 
-      - name: Install doc tools
+      - name: Install pandoc
         run: |
-          pip install -r doc/requirements.txt
-          sudo apt-get install pandoc
+          wget https://github.com/jgm/pandoc/releases/download/3.1.11/pandoc-3.1.11-1-amd64.deb
+          sudo dpkg -i pandoc-3.1.11-1-amd64.deb
+
+      - name: Cache datasets
+        run: |
+          git clone https://github.com/mwaskom/seaborn-data.git
+          ls $SEABORN_DATA
 
       - name: Build docs
+        env:
+          SPHINXOPTS: -j `nproc`
         run: |
-          make -C doc -j `nproc` notebooks
-          make -C doc html
+          cd doc
+          make -j `nproc` notebooks
+          make html
 
 
   run-tests:
@@ -45,57 +58,58 @@ jobs:
 
     strategy:
       matrix:
-
-        python: ['3.7.x', '3.8.x', '3.9.x']
-        target: [test]
-        install: [all]
+        python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        install: [full]
         deps: [latest]
-        backend: [agg]
 
         include:
-          - python: '3.7.x'
-            target: unittests
-            install: all
+          - python: "3.8"
+            install: full
             deps: pinned
-            backend: agg
-          - python: '3.9.x'
-            target: unittests
+          - python: "3.11"
             install: light
             deps: latest
-            backend: agg
-          - python: '3.9.x'
-            target: test
-            install: all
-            deps: latest
-            backend: tkagg
 
     steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: ${{ matrix.python }}
+          allow-prereleases: true
 
       - name: Install seaborn
         run: |
-          python -m pip install --upgrade pip
-          if [[ ${{matrix.install}} == 'all' ]]; then EXTRAS='[all]'; fi
+          pip install --upgrade pip wheel
+          if [[ ${{matrix.install}} == 'full' ]]; then EXTRAS=',stats'; fi
           if [[ ${{matrix.deps }} == 'pinned' ]]; then DEPS='-r ci/deps_pinned.txt'; fi
-          pip install .$EXTRAS $DEPS -r ci/utils.txt
-
-      - name: Cache datastes
-        run: python ci/cache_test_datasets.py
+          pip install .[dev$EXTRAS] $DEPS
 
       - name: Run tests
-        env:
-          MPLBACKEND: ${{ matrix.backend }}
-        run: |
-          if [[ ${{ matrix.backend }} == 'tkagg' ]]; then PREFIX='xvfb-run -a'; fi
-          $PREFIX make ${{ matrix.target }}
+        run: make test
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         if: ${{ success() }}
+
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+
+      - name: Install tools
+        run: pip install mypy flake8
+
+      - name: Flake8
+        run: make lint
+
+      - name: Type checking
+        run: make typecheck

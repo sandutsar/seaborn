@@ -36,34 +36,27 @@ RST_TEMPLATE = """
 
 **seaborn components used:** {components}
 
-.. raw:: html
-
-    <div class="col-md-9">
-
 .. literalinclude:: {fname}
     :lines: {end_line}-
-
-.. raw:: html
-
-    </div>
 
 """
 
 
 INDEX_TEMPLATE = """
+:html_theme.sidebar_secondary.remove:
 
 .. raw:: html
 
     <style type="text/css">
-    .figure {{
+    .thumb {{
         position: relative;
         float: left;
-        margin: 10px;
         width: 180px;
-        height: 200px;
+        height: 180px;
+        margin: 0;
     }}
 
-    .figure img {{
+    .thumb img {{
         position: absolute;
         display: inline;
         left: 0;
@@ -73,7 +66,7 @@ INDEX_TEMPLATE = """
         filter:alpha(opacity=100); /* For IE8 and earlier */
     }}
 
-    .figure:hover img {{
+    .thumb:hover img {{
         -webkit-filter: blur(3px);
         -moz-filter: blur(3px);
         -o-filter: blur(3px);
@@ -83,7 +76,7 @@ INDEX_TEMPLATE = """
         filter:alpha(opacity=100); /* For IE8 and earlier */
     }}
 
-    .figure span {{
+    .thumb span {{
         position: absolute;
         display: inline;
         left: 0;
@@ -96,14 +89,15 @@ INDEX_TEMPLATE = """
         z-index: 100;
     }}
 
-    .figure p {{
+    .thumb p {{
         position: absolute;
         top: 45%;
         width: 170px;
         font-size: 110%;
+        color: #fff;
     }}
 
-    .figure:hover span {{
+    .thumb:hover span {{
         visibility: visible;
         opacity: .4;
     }}
@@ -167,14 +161,14 @@ def indent(s, N=4):
     return s.replace('\n', '\n' + N * ' ')
 
 
-class ExampleGenerator(object):
+class ExampleGenerator:
     """Tools for generating an example page from a file"""
     def __init__(self, filename, target_dir):
         self.filename = filename
         self.target_dir = target_dir
         self.thumbloc = .5, .5
         self.extract_docstring()
-        with open(filename, "r") as fid:
+        with open(filename) as fid:
             self.filetext = fid.read()
 
         outfilename = op.join(target_dir, self.rstfilename)
@@ -185,7 +179,7 @@ class ExampleGenerator(object):
         if not op.exists(outfilename) or op.getmtime(outfilename) < file_mtime:
             self.exec_file()
         else:
-            print("skipping {0}".format(self.filename))
+            print(f"skipping {self.filename}")
 
     @property
     def dirname(self):
@@ -299,7 +293,7 @@ class ExampleGenerator(object):
         self.end_line = erow + 1 + start_row
 
     def exec_file(self):
-        print("running {0}".format(self.filename))
+        print(f"running {self.filename}")
 
         plt.close('all')
         my_globals = {'pl': plt,
@@ -310,22 +304,22 @@ class ExampleGenerator(object):
         fig.canvas.draw()
         pngfile = op.join(self.target_dir, self.pngfilename)
         thumbfile = op.join("example_thumbs", self.thumbfilename)
-        self.html = "<img src=../%s>" % self.pngfilename
+        self.html = f"<img src=../{self.pngfilename}>"
         fig.savefig(pngfile, dpi=75, bbox_inches="tight")
 
         cx, cy = self.thumbloc
         create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
 
     def toctree_entry(self):
-        return "   ./%s\n\n" % op.splitext(self.htmlfilename)[0]
+        return f"   ./{op.splitext(self.htmlfilename)[0]}\n\n"
 
     def contents_entry(self):
         return (".. raw:: html\n\n"
-                "    <div class='figure align-center'>\n"
-                "    <a href=./{0}>\n"
-                "    <img src=../_static/{1}>\n"
-                "    <span class='figure-label'>\n"
-                "    <p>{2}</p>\n"
+                "    <div class='thumb align-center'>\n"
+                "    <a href=./{}>\n"
+                "    <img src=../_static/{}>\n"
+                "    <span class='thumb-label'>\n"
+                "    <p>{}</p>\n"
                 "    </span>\n"
                 "    </a>\n"
                 "    </div>\n\n"
